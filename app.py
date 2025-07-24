@@ -70,34 +70,38 @@ def generate_frames():
             center = fore_finger
             cv2.circle(frame, center, 3, (0,255,0), -1)
             
-            # Check if all 5 fingers are visible (open hand) - no drawing
-            fingers_up = 0
-            if thumb[0] > landmarks[3][0]:  # thumb
-                fingers_up += 1
-            if fore_finger[1] < landmarks[6][1]:  # index
-                fingers_up += 1
-            if middle_finger[1] < landmarks[10][1]:  # middle
-                fingers_up += 1
-            if ring_finger[1] < landmarks[14][1]:  # ring
-                fingers_up += 1
-            if pinky[1] < landmarks[18][1]:  # pinky
-                fingers_up += 1
+            # Check finger positions
+            index_up = fore_finger[1] < landmarks[6][1]
+            middle_up = middle_finger[1] < landmarks[10][1]
+            ring_up = ring_finger[1] < landmarks[14][1]
+            pinky_up = pinky[1] < landmarks[18][1]
+            thumb_up = thumb[0] > landmarks[3][0]
             
             # Check for fist (clear) - all fingertips close to palm
-            is_fist = (fore_finger[1] > landmarks[6][1] and 
-                      middle_finger[1] > landmarks[10][1] and 
-                      ring_finger[1] > landmarks[14][1] and 
-                      pinky[1] > landmarks[18][1])
+            is_fist = (not index_up and not middle_up and not ring_up and not pinky_up)
+            
+            # Check if pointer and middle are together (no drawing) - distance between fingertips
+            pointer_middle_distance = ((fore_finger[0] - middle_finger[0])**2 + (fore_finger[1] - middle_finger[1])**2)**0.5
+            fingers_together = pointer_middle_distance < 30
+            
+            # Check if all 5 fingers are up
+            all_fingers_up = index_up and middle_up and ring_up and pinky_up and thumb_up
             
             if is_fist:  # Fist - clear canvas
                 bpoints = [deque(maxlen=512)]
                 blue_index = 0
                 paintWindow[67:,:,:] = 255
-            elif fingers_up >= 5:  # Open hand - pen up, no drawing
+            elif fingers_together:  # Pointer and middle together - no drawing
                 bpoints.append(deque(maxlen=512))
                 blue_index += 1
-            else:  # Normal drawing with index finger
+            elif all_fingers_up and not index_up:  # All fingers up but only index should draw - no drawing
+                bpoints.append(deque(maxlen=512))
+                blue_index += 1
+            elif index_up and not middle_up and not ring_up and not pinky_up:  # Only index finger up - draw
                 bpoints[blue_index].appendleft(center)
+            else:  # Other gestures - no drawing
+                bpoints.append(deque(maxlen=512))
+                blue_index += 1
         # Append the next deques when nothing is detected to avoid messing up
         else:
             bpoints.append(deque(maxlen=512))

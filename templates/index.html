@@ -33,18 +33,21 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: transparent;
-            border: 2px solid #333333;
-            border-radius: 8px;
-            padding: 8px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 16px;
+            padding: 12px;
             cursor: pointer;
             color: #333333;
             transition: all 0.3s ease;
             z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
         
         .theme-toggle:hover {
-            background: #f0f0f0;
+            background: rgba(255,255,255,1);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         }
         
         body.dark-mode {
@@ -57,12 +60,15 @@
         }
         
         body.dark-mode .theme-toggle {
-            border-color: #ffffff;
+            background: rgba(0,0,0,0.7);
             color: #ffffff;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
         
         body.dark-mode .theme-toggle:hover {
-            background: #333333;
+            background: rgba(0,0,0,0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
         }
         
         body.dark-mode .mode-indicator {
