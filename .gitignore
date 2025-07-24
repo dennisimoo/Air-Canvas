@@ -1,0 +1,35 @@
+# Context and documentation
+context.txt
+
+# Training data and models
+heart-training/
+
+# Claude AI files
+.claude/
+
+# Python cache
+__pycache__/
+*__pycache__*
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Virtual environment
+venv/
+env/
+ENV/

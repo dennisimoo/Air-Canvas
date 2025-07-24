@@ -114,6 +114,51 @@
             gap: 10px;
         }
         
+        .analysis-result {
+            background: #F0F9FF;
+            color: #1E40AF;
+            padding: 20px 30px;
+            border-radius: 12px;
+            border: 2px solid #3B82F6;
+            font-size: 20px;
+            font-weight: 600;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .confidence-bar {
+            width: 150px;
+            height: 10px;
+            background: #E5E7EB;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: #3B82F6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        body.dark-mode .analysis-result {
+            background: #1E293B;
+            color: #60A5FA;
+            border-color: #3B82F6;
+        }
+        
         .video-container {
             position: relative;
             border-radius: 16px;
@@ -181,7 +226,16 @@
     <div class="canvas-area">
         <div class="status-message">
             <i data-lucide="hand"></i>
-Make a fist to clear canvas.
+            <span id="statusText">Make a fist to clear canvas.</span>
+        </div>
+        
+        <div id="analysisResult" class="analysis-result" style="display: none;">
+            <i data-lucide="heart"></i>
+            <span id="resultText"></span>
+            <div class="confidence-bar">
+                <div class="confidence-fill" id="confidenceBar"></div>
+            </div>
+            <span id="confidenceText">0%</span>
         </div>
         
         <div class="video-container">
@@ -209,6 +263,53 @@ Make a fist to clear canvas.
                 darkIcon.style.display = 'none';
             }
         });
+        
+        // Single check when page loads, then only when triggered
+        let lastResult = '';
+        
+        function checkForAnalysis() {
+            fetch('/get_analysis')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result) {
+                        const analysisDiv = document.getElementById('analysisResult');
+                        const resultText = document.getElementById('resultText');
+                        const confidenceBar = document.getElementById('confidenceBar');
+                        const confidenceText = document.getElementById('confidenceText');
+                        
+                        console.log(`SHOWING UI ALERT: ${data.result} with ${data.confidence}% confidence!`);
+                        
+                        resultText.textContent = data.result;
+                        confidenceBar.style.width = data.confidence + '%';
+                        confidenceText.textContent = data.confidence + '%';
+                        analysisDiv.style.display = 'flex';
+                        lastResult = data.result;
+                        
+                        // Hide after 4 seconds
+                        setTimeout(() => {
+                            analysisDiv.style.display = 'none';
+                            lastResult = '';
+                        }, 4000);
+                    }
+                });
+        }
+        
+        // Check for debug messages
+        function checkDebugMessages() {
+            fetch('/get_debug')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.messages && data.messages.length > 0) {
+                        data.messages.forEach(message => {
+                            console.log(message);
+                        });
+                    }
+                });
+        }
+        
+        // Check every 1 second for new results and debug messages
+        setInterval(checkForAnalysis, 1000);
+        setInterval(checkDebugMessages, 500);
     </script>
 </body>
 </html>

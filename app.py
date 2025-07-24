@@ -1,13 +1,15 @@
-from flask import Flask, render_template, Response
-import cv2
+from collections import deque
+import cv2 
 import numpy as np
 import mediapipe as mp
-from collections import deque
+from flask import Flask, render_template, Response, jsonify
 import time
+import torch
+from ultralytics import YOLO
 
 app = Flask(__name__)
 
-# Only blue drawing points
+# Giving different arrays to handle colour points of different colour
 bpoints = [deque(maxlen=1024)]
 
 # Blue index for drawing
@@ -19,7 +21,7 @@ color = (255, 100, 200)
 # Here is code for Canvas setup
 paintWindow = np.zeros((471,636,3)) + 255
 
-# initialize mediapipe
+# Initialize MediaPipe
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7)
 mpDraw = mp.solutions.drawing_utils
@@ -29,9 +31,76 @@ cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
+# Analysis result
+analysis_result = ""
+analysis_confidence = 0
+last_analysis_time = 0
+
+# Load the trained heart detection model
+try:
+    heart_model = YOLO('heart_detect.pt')
+    print("Heart detection model loaded successfully!")
+except Exception as e:
+    print(f"Failed to load heart model: {e}")
+    heart_model = None
+
+# Debug messages for browser console
+debug_messages = []
+
+def analyze_drawing():
+    global analysis_result, analysis_confidence, debug_messages
+    
+    if heart_model is None:
+        analysis_result = "Model not loaded"
+        analysis_confidence = 0
+        debug_messages.append("ALERT SENT: Heart detection model not loaded")
+        return
+    
+    # Create a white image to draw the path (same as training data)
+    analysis_img = np.ones((400, 600, 3), dtype=np.uint8) * 255
+    
+    # Draw all the points as pink lines (same as training data)
+    for j in range(len(bpoints)):
+        for k in range(1, len(bpoints[j])):
+            if bpoints[j][k - 1] is None or bpoints[j][k] is None:
+                continue
+            cv2.line(analysis_img, 
+                    (int(bpoints[j][k - 1][0] * 600/640), int(bpoints[j][k - 1][1] * 400/480)), 
+                    (int(bpoints[j][k][0] * 600/640), int(bpoints[j][k][1] * 400/480)), 
+                    (255, 100, 200), 8)  # Same color and thickness as training
+    
+    try:
+        # Use the trained model to predict
+        results = heart_model.predict(analysis_img, verbose=False)
+        
+        if len(results) > 0 and len(results[0].probs) > 0:
+            # Get the predicted class probabilities
+            probs = results[0].probs.data.cpu().numpy()
+            
+            # Assuming class 0 is 'hearts' and class 1 is 'not_hearts'
+            heart_confidence = int(probs[0] * 100) if len(probs) > 0 else 0
+            
+            if heart_confidence > 50:  # 50% threshold
+                analysis_result = "Heart detected!"
+                analysis_confidence = heart_confidence
+                debug_messages.append(f"ALERT SENT: Heart detected with {heart_confidence}% confidence!")
+            else:
+                analysis_result = ""
+                analysis_confidence = 0
+                debug_messages.append(f"Not detected - {heart_confidence}% confidence")
+        else:
+            analysis_result = ""
+            analysis_confidence = 0
+            debug_messages.append("No prediction from model")
+            
+    except Exception as e:
+        analysis_result = ""
+        analysis_confidence = 0
+        debug_messages.append(f"Model error - {str(e)}")
+
 def generate_frames():
     global bpoints, blue_index
-    global paintWindow
+    global paintWindow, analysis_result, analysis_confidence, last_analysis_time
     
     while True:
         # Read each frame from the webcam
@@ -70,12 +139,12 @@ def generate_frames():
             center = fore_finger
             cv2.circle(frame, center, 3, (0,255,0), -1)
             
-            # Check finger positions
-            index_up = fore_finger[1] < landmarks[6][1]
-            middle_up = middle_finger[1] < landmarks[10][1]
-            ring_up = ring_finger[1] < landmarks[14][1]
-            pinky_up = pinky[1] < landmarks[18][1]
-            thumb_up = thumb[0] > landmarks[3][0]
+            # Check finger positions - proper detection
+            index_up = fore_finger[1] < landmarks[6][1] - 10
+            middle_up = middle_finger[1] < landmarks[10][1] - 10
+            ring_up = ring_finger[1] < landmarks[14][1] - 10
+            pinky_up = pinky[1] < landmarks[18][1] - 10
+            thumb_up = thumb[0] > landmarks[3][0] + 20  # thumb extended
             
             # Check for fist (clear) - all fingertips close to palm
             is_fist = (not index_up and not middle_up and not ring_up and not pinky_up)
@@ -84,17 +153,32 @@ def generate_frames():
             pointer_middle_distance = ((fore_finger[0] - middle_finger[0])**2 + (fore_finger[1] - middle_finger[1])**2)**0.5
             fingers_together = pointer_middle_distance < 30
             
-            # Check if all 5 fingers are up
-            all_fingers_up = index_up and middle_up and ring_up and pinky_up and thumb_up
+            # Check if all 5 fingers are up - high five position
+            fingers_extended = [index_up, middle_up, ring_up, pinky_up, thumb_up]
+            all_fingers_up = sum(fingers_extended) >= 4  # At least 4 out of 5 fingers
             
             if is_fist:  # Fist - clear canvas
                 bpoints = [deque(maxlen=512)]
                 blue_index = 0
                 paintWindow[67:,:,:] = 255
+                # Clear analysis result when clearing canvas
+                analysis_result = ""
+                analysis_confidence = 0
+                # Reset cooldown properly when clearing
+                last_analysis_time = time.time() - 6  # Allow immediate analysis after clearing
             elif fingers_together:  # Pointer and middle together - no drawing
                 bpoints.append(deque(maxlen=512))
                 blue_index += 1
-            elif all_fingers_up and not index_up:  # All fingers up but only index should draw - no drawing
+            elif all_fingers_up:  # All 5 fingers up - analyze drawing
+                # Only send debug messages once per gesture to reduce spam
+                current_time = time.time()
+                has_drawing = any(len(points) > 1 for points in bpoints if points)
+                
+                # Only analyze if cooldown has passed
+                if has_drawing and (current_time - last_analysis_time) > 5:
+                    debug_messages.append("FIVE FINGERS DETECTED! Analyzing drawing...")
+                    analyze_drawing()
+                    last_analysis_time = current_time
                 bpoints.append(deque(maxlen=512))
                 blue_index += 1
             elif index_up and not middle_up and not ring_up and not pinky_up:  # Only index finger up - draw
@@ -127,6 +211,17 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/get_analysis')
+def get_analysis():
+    return {'result': analysis_result, 'confidence': analysis_confidence}
+
+@app.route('/get_debug')
+def get_debug():
+    global debug_messages
+    messages = debug_messages.copy()
+    debug_messages = []  # Clear after sending
+    return {'messages': messages}
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001, threaded=True)

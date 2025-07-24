@@ -2,4 +2,5 @@ flask
 opencv-python
 mediapipe
 numpy
-tensorflow
+torch
+ultralytics
