@@ -13,19 +13,15 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            color: #333333;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+            padding: 24px;
             position: relative;
         }
         
@@ -33,151 +29,134 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            border-radius: 16px;
-            padding: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px;
             cursor: pointer;
-            color: #333333;
-            transition: all 0.3s ease;
+            color: #64748b;
+            transition: all 0.2s ease;
             z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .theme-toggle:hover {
-            background: rgba(255,255,255,1);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            background: #f1f5f9;
+            transform: translateY(-1px);
         }
         
         body.dark-mode {
-            background: #1a1a1a;
-            color: white;
-        }
-        
-        body.dark-mode .main-title {
-            color: #ffffff;
+            background: #0f172a;
+            color: #e2e8f0;
         }
         
         body.dark-mode .theme-toggle {
-            background: rgba(0,0,0,0.7);
-            color: #ffffff;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
         }
         
         body.dark-mode .theme-toggle:hover {
-            background: rgba(0,0,0,0.9);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            background: #334155;
         }
         
-        body.dark-mode .mode-indicator {
-            background: rgba(0,0,0,0.7);
-            color: white;
+        body.dark-mode .title {
+            color: #f1f5f9;
         }
         
-        body.dark-mode .video-container {
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        body.dark-mode .subtitle {
+            color: #94a3b8;
         }
         
-        .main-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 20px;
-            color: #333333;
+        body.dark-mode .gesture-item {
+            color: #94a3b8;
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(71, 85, 105, 0.5);
         }
         
+        body.dark-mode .status-overlay {
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+        }
         
-        .canvas-area {
+        .credit {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+        
+        body.dark-mode .credit {
+            color: #94a3b8;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+        
+        .main-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
             width: 100%;
-            max-width: 1200px;
-        }
-        
-        .status-message {
-            background: #E8F4FD;
-            color: #2E5BBA;
-            padding: 15px 30px;
-            border-radius: 8px;
-            border-left: 4px solid #2E5BBA;
-            font-size: 18px;
-            font-weight: 500;
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .analysis-result {
-            background: #F0F9FF;
-            color: #1E40AF;
-            padding: 20px 30px;
-            border-radius: 12px;
-            border: 2px solid #3B82F6;
-            font-size: 20px;
-            font-weight: 600;
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 10px;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        .confidence-bar {
-            width: 150px;
-            height: 10px;
-            background: #E5E7EB;
-            border-radius: 5px;
+            max-width: 900px;
+            flex: 1;
             overflow: hidden;
         }
         
-        .confidence-fill {
-            height: 100%;
-            background: #3B82F6;
-            width: 0%;
-            transition: width 0.3s ease;
+        .instructions {
+            background: transparent;
+            padding: 0;
+            width: 100%;
+            border: none;
+            box-shadow: none;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .instructions h3 {
+            display: none;
         }
         
-        body.dark-mode .analysis-result {
-            background: #1E293B;
-            color: #60A5FA;
-            border-color: #3B82F6;
+        .gesture-list {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        
+        .gesture-item {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 400;
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
         .video-container {
             position: relative;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             background: #000;
-        }
-        
-        .mode-indicator {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.9);
-            color: #333333;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            z-index: 10;
         }
         
         .video-stream {
@@ -187,6 +166,73 @@
             object-fit: cover;
         }
         
+        .status-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255,255,255,0.95);
+            color: #374151;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .analysis-result {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease-out;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+            backdrop-filter: blur(10px);
+            min-width: 320px;
+        }
+        
+        body.dark-mode .analysis-result {
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+        
+        .confidence-display {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        body.dark-mode .confidence-display {
+            color: #94a3b8;
+        }
+        
+        .confidence-bar,
+        .confidence-fill {
+            display: none;
+        }
+        
+        @keyframes slideInRight {
+            0% { 
+                opacity: 0; 
+                transform: translateX(100%);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
         
         @media (max-width: 1024px) {
             .video-stream {
@@ -194,59 +240,81 @@
                 height: 450px;
             }
             
-            .main-title {
-                font-size: 2rem;
+            .title {
+                font-size: 1.75rem;
             }
-            
         }
         
         @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
             .video-stream {
                 width: 100%;
                 max-width: 480px;
                 height: 360px;
             }
             
-            .main-title {
+            .title {
                 font-size: 1.5rem;
             }
             
+            .gesture-list {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body>
+<body class="dark-mode">
+    <button id="themeToggle" class="theme-toggle">
+        <i data-lucide="sun" id="lightIcon" style="display: none;"></i>
+        <i data-lucide="moon" id="darkIcon"></i>
+    </button>
+    
     <div class="header">
-        <h1 class="main-title">Air Canvas</h1>
-        <button id="themeToggle" class="theme-toggle">
-            <i data-lucide="sun" id="lightIcon"></i>
-            <i data-lucide="moon" id="darkIcon" style="display: none;"></i>
-        </button>
+        <h1 class="title">Air Canvas</h1>
     </div>
     
-    <div class="canvas-area">
-        <div class="status-message">
-            <i data-lucide="hand"></i>
-            <span id="statusText">Make a fist to clear canvas.</span>
-        </div>
-        
-        <div id="analysisResult" class="analysis-result" style="display: none;">
-            <i data-lucide="heart"></i>
-            <span id="resultText"></span>
-            <div class="confidence-bar">
-                <div class="confidence-fill" id="confidenceBar"></div>
+    <div class="main-container">
+        <div class="instructions">
+            <h3>
+                <i data-lucide="info" size="18"></i>
+                Hand Gestures
+            </h3>
+            <div class="gesture-list">
+                <div class="gesture-item">Index finger: Draw</div>
+                <div class="gesture-item">Fist: Clear canvas</div>
+                <div class="gesture-item">Two fingers: Pen up</div>
+                <div class="gesture-item">High five: Analyze</div>
             </div>
-            <span id="confidenceText">0%</span>
         </div>
         
         <div class="video-container">
-            <div class="mode-indicator">Mode: DRAW</div>
+            <div class="status-overlay">
+                <i data-lucide="video" size="16"></i>
+                <span>Ready to draw</span>
+            </div>
             <img src="{{ url_for('video_feed') }}" class="video-stream" alt="Video Stream">
+        </div>
+        
+        <div class="credit">
+            Made by Dennis Khylkouski
+        </div>
+    </div>
+    
+    <div id="analysisResult" class="analysis-result">
+        <i data-lucide="check-circle" size="16"></i>
+        <div>
+            <span id="resultText"></span>
+            <div class="confidence-display" id="confidenceText">0% confidence</div>
         </div>
     </div>
     
     <script>
         lucide.createIcons();
         
+        // Dark mode toggle
         const themeToggle = document.getElementById('themeToggle');
         const lightIcon = document.getElementById('lightIcon');
         const darkIcon = document.getElementById('darkIcon');
@@ -264,9 +332,6 @@
             }
         });
         
-        // Single check when page loads, then only when triggered
-        let lastResult = '';
-        
         function checkForAnalysis() {
             fetch('/get_analysis')
                 .then(response => response.json())
@@ -274,27 +339,21 @@
                     if (data.result) {
                         const analysisDiv = document.getElementById('analysisResult');
                         const resultText = document.getElementById('resultText');
-                        const confidenceBar = document.getElementById('confidenceBar');
                         const confidenceText = document.getElementById('confidenceText');
                         
-                        console.log(`SHOWING UI ALERT: ${data.result} with ${data.confidence}% confidence!`);
+                        console.log(`Analysis: ${data.result} with ${data.confidence}% confidence`);
                         
                         resultText.textContent = data.result;
-                        confidenceBar.style.width = data.confidence + '%';
-                        confidenceText.textContent = data.confidence + '%';
+                        confidenceText.textContent = `${data.confidence}% confidence`;
                         analysisDiv.style.display = 'flex';
-                        lastResult = data.result;
                         
-                        // Hide after 4 seconds
                         setTimeout(() => {
                             analysisDiv.style.display = 'none';
-                            lastResult = '';
-                        }, 4000);
+                        }, 3000);
                     }
                 });
         }
         
-        // Check for debug messages
         function checkDebugMessages() {
             fetch('/get_debug')
                 .then(response => response.json())
@@ -307,7 +366,6 @@
                 });
         }
         
-        // Check every 1 second for new results and debug messages
         setInterval(checkForAnalysis, 1000);
         setInterval(checkDebugMessages, 500);
     </script>
