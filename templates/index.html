@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Canvas</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #333333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 2px solid #333333;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            color: #333333;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .theme-toggle:hover {
+            background: #f0f0f0;
+        }
+        
+        body.dark-mode {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        body.dark-mode .main-title {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .theme-toggle {
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+        
+        body.dark-mode .theme-toggle:hover {
+            background: #333333;
+        }
+        
+        body.dark-mode .mode-indicator {
+            background: rgba(0,0,0,0.7);
+            color: white;
+        }
+        
+        body.dark-mode .video-container {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 20px;
+            color: #333333;
+        }
+        
+        
+        .canvas-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .status-message {
+            background: #E8F4FD;
+            color: #2E5BBA;
+            padding: 15px 30px;
+            border-radius: 8px;
+            border-left: 4px solid #2E5BBA;
+            font-size: 18px;
+            font-weight: 500;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .video-container {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            background: #000;
+        }
+        
+        .mode-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            color: #333333;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10;
+        }
+        
+        .video-stream {
+            display: block;
+            width: 800px;
+            height: 600px;
+            object-fit: cover;
+        }
+        
+        
+        @media (max-width: 1024px) {
+            .video-stream {
+                width: 600px;
+                height: 450px;
+            }
+            
+            .main-title {
+                font-size: 2rem;
+            }
+            
+        }
+        
+        @media (max-width: 768px) {
+            .video-stream {
+                width: 100%;
+                max-width: 480px;
+                height: 360px;
+            }
+            
+            .main-title {
+                font-size: 1.5rem;
+            }
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="main-title">Air Canvas</h1>
+        <button id="themeToggle" class="theme-toggle">
+            <i data-lucide="sun" id="lightIcon"></i>
+            <i data-lucide="moon" id="darkIcon" style="display: none;"></i>
+        </button>
+    </div>
+    
+    <div class="canvas-area">
+        <div class="status-message">
+            <i data-lucide="hand"></i>
+Make a fist to clear canvas.
+        </div>
+        
+        <div class="video-container">
+            <div class="mode-indicator">Mode: DRAW</div>
+            <img src="{{ url_for('video_feed') }}" class="video-stream" alt="Video Stream">
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+        
+        const themeToggle = document.getElementById('themeToggle');
+        const lightIcon = document.getElementById('lightIcon');
+        const darkIcon = document.getElementById('darkIcon');
+        const body = document.body;
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'inline';
+            } else {
+                lightIcon.style.display = 'inline';
+                darkIcon.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
