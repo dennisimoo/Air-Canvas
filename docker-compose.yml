@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  hand-detection:
+    build: .
+    ports:
+      - "5001:5001"
+    devices:
+      - /dev/video0:/dev/video0
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    privileged: true

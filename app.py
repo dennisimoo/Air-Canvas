@@ -2,10 +2,12 @@ from collections import deque
 import cv2 
 import numpy as np
 import mediapipe as mp
-from flask import Flask, render_template, Response, jsonify
+from flask import Flask, render_template, Response, jsonify, request
 import time
 import torch
 from ultralytics import YOLO
+import io
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -26,10 +28,7 @@ mpHands = mp.solutions.hands
 hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7)
 mpDraw = mp.solutions.drawing_utils
 
-# Initialize the webcam
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# No webcam needed for WebRTC - frames come from browser
 
 # Analysis result
 analysis_result = ""
@@ -98,119 +97,163 @@ def analyze_drawing():
         analysis_confidence = 0
         debug_messages.append(f"Model error - {str(e)}")
 
-def generate_frames():
+def process_frame_data(frame):
     global bpoints, blue_index
     global paintWindow, analysis_result, analysis_confidence, last_analysis_time
     
-    while True:
-        # Read each frame from the webcam
-        ret, frame = cap.read()
-        if not ret:
-            continue
+    if frame is None:
+        return frame
+    
+    x, y, c = frame.shape
+    framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        x, y, c = frame.shape
+    # Get hand landmark prediction
+    result = hands.process(framergb)
 
-        # Flip the frame vertically
-        frame = cv2.flip(frame, 1)
-        framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # post process the result
+    if result.multi_hand_landmarks:
+        landmarks = []
+        for handslms in result.multi_hand_landmarks:
+            for lm in handslms.landmark:
+                lmx = int(lm.x * frame.shape[1])
+                lmy = int(lm.y * frame.shape[0])
+                landmarks.append([lmx, lmy])
 
-        # Get hand landmark prediction
-        result = hands.process(framergb)
-
-        # post process the result
-        if result.multi_hand_landmarks:
-            landmarks = []
-            for handslms in result.multi_hand_landmarks:
-                for lm in handslms.landmark:
-                    lmx = int(lm.x * 640)
-                    lmy = int(lm.y * 480)
-                    landmarks.append([lmx, lmy])
-
-                # Drawing landmarks on frames
-                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
-            
-            # Get key landmarks
-            fore_finger = (landmarks[8][0], landmarks[8][1])
-            middle_finger = (landmarks[12][0], landmarks[12][1])
-            ring_finger = (landmarks[16][0], landmarks[16][1])
-            pinky = (landmarks[20][0], landmarks[20][1])
-            thumb = (landmarks[4][0], landmarks[4][1])
-            
-            center = fore_finger
-            cv2.circle(frame, center, 3, (0,255,0), -1)
-            
-            # Check finger positions - proper detection
-            index_up = fore_finger[1] < landmarks[6][1] - 10
-            middle_up = middle_finger[1] < landmarks[10][1] - 10
-            ring_up = ring_finger[1] < landmarks[14][1] - 10
-            pinky_up = pinky[1] < landmarks[18][1] - 10
-            thumb_up = thumb[0] > landmarks[3][0] + 20  # thumb extended
-            
-            # Check for fist (clear) - all fingertips close to palm
-            is_fist = (not index_up and not middle_up and not ring_up and not pinky_up)
-            
-            # Check if pointer and middle are together (no drawing) - distance between fingertips
-            pointer_middle_distance = ((fore_finger[0] - middle_finger[0])**2 + (fore_finger[1] - middle_finger[1])**2)**0.5
-            fingers_together = pointer_middle_distance < 30
-            
-            # Check if all 5 fingers are up - high five position
-            fingers_extended = [index_up, middle_up, ring_up, pinky_up, thumb_up]
-            all_fingers_up = sum(fingers_extended) >= 4  # At least 4 out of 5 fingers
-            
-            if is_fist:  # Fist - clear canvas
-                bpoints = [deque(maxlen=512)]
-                blue_index = 0
-                paintWindow[67:,:,:] = 255
-                # Clear analysis result when clearing canvas
-                analysis_result = ""
-                analysis_confidence = 0
-                # Reset cooldown properly when clearing
-                last_analysis_time = time.time() - 6  # Allow immediate analysis after clearing
-            elif fingers_together:  # Pointer and middle together - no drawing
-                bpoints.append(deque(maxlen=512))
-                blue_index += 1
-            elif all_fingers_up:  # All 5 fingers up - analyze drawing
-                # Only send debug messages once per gesture to reduce spam
-                current_time = time.time()
-                has_drawing = any(len(points) > 1 for points in bpoints if points)
-                
-                # Only analyze if cooldown has passed
-                if has_drawing and (current_time - last_analysis_time) > 5:
-                    debug_messages.append("FIVE FINGERS DETECTED! Analyzing drawing...")
-                    analyze_drawing()
-                    last_analysis_time = current_time
-                bpoints.append(deque(maxlen=512))
-                blue_index += 1
-            elif index_up and not middle_up and not ring_up and not pinky_up:  # Only index finger up - draw
-                bpoints[blue_index].appendleft(center)
-            else:  # Other gestures - no drawing
-                bpoints.append(deque(maxlen=512))
-                blue_index += 1
-        # Append the next deques when nothing is detected to avoid messing up
-        else:
+            # Drawing landmarks on frames
+            mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
+        
+        # Get key landmarks
+        fore_finger = (landmarks[8][0], landmarks[8][1])
+        middle_finger = (landmarks[12][0], landmarks[12][1])
+        ring_finger = (landmarks[16][0], landmarks[16][1])
+        pinky = (landmarks[20][0], landmarks[20][1])
+        thumb = (landmarks[4][0], landmarks[4][1])
+        
+        center = fore_finger
+        cv2.circle(frame, center, 3, (0,255,0), -1)
+        
+        # Check finger positions - proper detection
+        index_up = fore_finger[1] < landmarks[6][1] - 10
+        middle_up = middle_finger[1] < landmarks[10][1] - 10
+        ring_up = ring_finger[1] < landmarks[14][1] - 10
+        pinky_up = pinky[1] < landmarks[18][1] - 10
+        thumb_up = thumb[0] > landmarks[3][0] + 20  # thumb extended
+        
+        # Check for fist (clear) - all fingertips close to palm
+        is_fist = (not index_up and not middle_up and not ring_up and not pinky_up)
+        
+        # Check if pointer and middle are together (no drawing) - distance between fingertips
+        pointer_middle_distance = ((fore_finger[0] - middle_finger[0])**2 + (fore_finger[1] - middle_finger[1])**2)**0.5
+        fingers_together = pointer_middle_distance < 30
+        
+        # Check if all 5 fingers are up - high five position
+        fingers_extended = [index_up, middle_up, ring_up, pinky_up, thumb_up]
+        all_fingers_up = sum(fingers_extended) >= 4  # At least 4 out of 5 fingers
+        
+        if is_fist:  # Fist - clear canvas
+            bpoints = [deque(maxlen=512)]
+            blue_index = 0
+            paintWindow[67:,:,:] = 255
+            # Clear analysis result when clearing canvas
+            analysis_result = ""
+            analysis_confidence = 0
+            # Reset cooldown properly when clearing
+            last_analysis_time = time.time() - 6  # Allow immediate analysis after clearing
+        elif fingers_together:  # Pointer and middle together - no drawing
             bpoints.append(deque(maxlen=512))
             blue_index += 1
+        elif all_fingers_up:  # All 5 fingers up - analyze drawing
+            # Only send debug messages once per gesture to reduce spam
+            current_time = time.time()
+            has_drawing = any(len(points) > 1 for points in bpoints if points)
+            
+            # Only analyze if cooldown has passed
+            if has_drawing and (current_time - last_analysis_time) > 5:
+                debug_messages.append("FIVE FINGERS DETECTED! Analyzing drawing...")
+                analyze_drawing()
+                last_analysis_time = current_time
+            bpoints.append(deque(maxlen=512))
+            blue_index += 1
+        elif index_up and not middle_up and not ring_up and not pinky_up:  # Only index finger up - draw
+            bpoints[blue_index].appendleft(center)
+        else:  # Other gestures - no drawing
+            bpoints.append(deque(maxlen=512))
+            blue_index += 1
+    # Append the next deques when nothing is detected to avoid messing up
+    else:
+        bpoints.append(deque(maxlen=512))
+        blue_index += 1
 
-        # Draw blue lines on the frame
-        for j in range(len(bpoints)):
-            for k in range(1, len(bpoints[j])):
-                if bpoints[j][k - 1] is None or bpoints[j][k] is None:
-                    continue
-                cv2.line(frame, bpoints[j][k - 1], bpoints[j][k], color, 8)
+    # Draw pink lines on the frame
+    for j in range(len(bpoints)):
+        for k in range(1, len(bpoints[j])):
+            if bpoints[j][k - 1] is None or bpoints[j][k] is None:
+                continue
+            cv2.line(frame, bpoints[j][k - 1], bpoints[j][k], color, 8)
 
-        # Encode frame
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    return frame
+
+@app.route('/process_frame', methods=['POST'])
+def process_frame():
+    if 'frame' not in request.files:
+        return 'No frame', 400
+    
+    file = request.files['frame']
+    if file.filename == '':
+        return 'No frame', 400
+    
+    try:
+        # Read image from browser
+        image = Image.open(io.BytesIO(file.read()))
+        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        
+        # Process the frame (add hand landmarks and drawings)
+        processed_frame = process_frame_data(frame)
+        
+        # Encode processed frame as JPEG
+        ret, buffer = cv2.imencode('.jpg', processed_frame)
+        if ret:
+            return Response(buffer.tobytes(), mimetype='image/jpeg')
+        else:
+            return 'Processing failed', 500
+            
+    except Exception as e:
+        print(f"Error processing frame: {e}")
+        return 'Error', 500
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/analyze_drawing', methods=['POST'])
+def analyze_drawing():
+    if 'drawing' not in request.files:
+        return jsonify({'confidence': 0})
+    
+    file = request.files['drawing']
+    if file.filename == '':
+        return jsonify({'confidence': 0})
+    
+    try:
+        # Read image from browser
+        image = Image.open(io.BytesIO(file.read()))
+        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        
+        # Use the trained model to predict
+        if heart_model is not None:
+            results = heart_model.predict(frame, verbose=False)
+            
+            if len(results) > 0 and len(results[0].probs) > 0:
+                probs = results[0].probs.data.cpu().numpy()
+                heart_confidence = int(probs[0] * 100) if len(probs) > 0 else 0
+                return jsonify({'confidence': heart_confidence})
+        
+        return jsonify({'confidence': 0})
+        
+    except Exception as e:
+        print(f"Error analyzing drawing: {e}")
+        return jsonify({'confidence': 0})
 
 @app.route('/get_analysis')
 def get_analysis():

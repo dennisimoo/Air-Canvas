@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-# Install system dependencies
+# Install system dependencies including camera support
 RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libsm6 \
@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libtiff-dev \
     libatlas-base-dev \
     python3-dev \
+    v4l-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
