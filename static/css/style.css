@@ -1,0 +1,368 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc;
+    color: #334155;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    position: relative;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.theme-toggle:hover {
+    background: #f1f5f9;
+    transform: translateY(-1px);
+}
+
+body.dark-mode {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark-mode .theme-toggle {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .theme-toggle:hover {
+    background: #334155;
+}
+
+body.dark-mode .title {
+    color: #f1f5f9;
+}
+
+body.dark-mode .subtitle {
+    color: #94a3b8;
+}
+
+.gesture-item {
+    font-size: 0.8rem;
+    color: #374151;
+    font-weight: 500;
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .gesture-item {
+    color: #94a3b8;
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(71, 85, 105, 0.5);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .status-overlay {
+    background: rgba(30, 41, 59, 0.95);
+    color: #e2e8f0;
+}
+
+.credit {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+body.dark-mode .credit {
+    color: #94a3b8;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 900px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.instructions {
+    background: transparent;
+    padding: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+}
+
+.instructions h3 {
+    display: none;
+}
+
+.gesture-list {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.video-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    background: #000;
+}
+
+.video-stream {
+    display: block;
+    width: 800px;
+    height: 600px;
+    object-fit: cover;
+}
+
+.status-overlay {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(255,255,255,0.95);
+    color: #374151;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.analysis-result {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #1e293b;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    animation: slideInRight 0.3s ease-out;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    backdrop-filter: blur(10px);
+    min-width: 320px;
+}
+
+body.dark-mode .analysis-result {
+    background: rgba(30, 41, 59, 0.95);
+    color: #e2e8f0;
+    border-color: #475569;
+}
+
+.confidence-display {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+body.dark-mode .confidence-display {
+    color: #94a3b8;
+}
+
+.confidence-bar,
+.confidence-fill {
+    display: none;
+}
+
+@keyframes slideInRight {
+    0% { 
+        opacity: 0; 
+        transform: translateX(100%);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+}
+
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.tutorial-content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: tutorialSlideIn 0.4s ease-out;
+}
+
+body.dark-mode .tutorial-content {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+.tutorial-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #1e293b;
+}
+
+body.dark-mode .tutorial-title {
+    color: #f1f5f9;
+}
+
+.tutorial-steps {
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.tutorial-step {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+body.dark-mode .tutorial-step {
+    background: #334155;
+    border-left-color: #60a5fa;
+}
+
+.tutorial-step-icon {
+    margin-right: 12px;
+    color: #3b82f6;
+}
+
+body.dark-mode .tutorial-step-icon {
+    color: #60a5fa;
+}
+
+.tutorial-step-text {
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+body.dark-mode .tutorial-step-text {
+    color: #e2e8f0;
+}
+
+.tutorial-button {
+    background: #475569 !important;
+    color: white !important;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tutorial-button:hover {
+    background: #64748b !important;
+    transform: translateY(-1px);
+}
+
+@keyframes tutorialSlideIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@media (max-width: 1024px) {
+    .video-stream {
+        width: 600px;
+        height: 450px;
+    }
+    
+    .title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 16px;
+    }
+    
+    .video-stream {
+        width: 100%;
+        max-width: 480px;
+        height: 360px;
+    }
+    
+    .title {
+        font-size: 1.5rem;
+    }
+    
+    .gesture-list {
+        grid-template-columns: 1fr;
+    }
+}
