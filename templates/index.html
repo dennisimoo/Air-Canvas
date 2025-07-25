@@ -22,23 +22,6 @@
     </div>
     
     <div class="main-container">
-        <div class="instructions">
-            <h3>
-                <i data-lucide="info" size="18"></i>
-                Hand Gestures
-            </h3>
-            <div class="gesture-list">
-                <div class="gesture-item">Index finger: Draw</div>
-                <div class="gesture-item">Fist: Clear canvas</div>
-                <div class="gesture-item">Two fingers: Pen up</div>
-                <div class="gesture-item">High five: Analyze</div>
-            </div>
-            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #64748b; margin-top: 8px; gap: 4px;">
-                <i data-lucide="info" size="12"></i>
-                Currently only recognizes heart drawings
-            </div>
-        </div>
-        
         <div class="video-container">
             <div class="status-overlay">
                 <i data-lucide="video" size="16"></i>
@@ -49,9 +32,39 @@
             <canvas id="captureCanvas" style="display: none;"></canvas>
         </div>
         
+        <div class="control-gestures">
+            <div class="gesture-main">
+                <span class="control-title">Control gestures:</span>
+                <div class="gesture-icons">
+                    <div class="gesture-icon">
+                        <div class="hand-icon">
+                            <i data-lucide="pointer" size="16"></i>
+                        </div>
+                        <span>Index finger: Draw</span>
+                    </div>
+                    <div class="gesture-icon">
+                        <div class="hand-icon">
+                            <i data-lucide="hand" size="16"></i>
+                        </div>
+                        <span>Fist: Clear canvas</span>
+                    </div>
+                    <div class="gesture-icon">
+                        <div class="hand-icon">
+                            <i data-lucide="hand-metal" size="16"></i>
+                        </div>
+                        <span>High five: Analyze</span>
+                    </div>
+                </div>
+            </div>
+            <div class="heart-note">
+                <i data-lucide="heart" size="12"></i>
+                <span>Currently only recognizes heart drawings</span>
+            </div>
+        </div>
+        
         <div class="credit">
             Made by Dennis Khylkouski
-            <a href="https://github.com/dennisimoo/Air-Canvas" target="_blank" rel="noopener noreferrer" style="margin-left: 8px; color: inherit; text-decoration: none;" title="GitHub Repository">
+            <a href="https://github.com/dennisimoo/Air-Canvas" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;" title="GitHub Repository">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="height: 12px; width: 12px;">
                     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
                 </svg>
