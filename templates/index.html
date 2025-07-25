@@ -306,6 +306,11 @@
         
         <div class="credit">
             Made by Dennis Khylkouski
+            <a href="https://github.com/dennisimoo/Air-Canvas" target="_blank" rel="noopener noreferrer" style="margin-left: 8px; color: inherit; text-decoration: none;" title="GitHub Repository">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="height: 16px; width: 16px;">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
+            </a>
         </div>
     </div>
     
@@ -436,15 +441,21 @@
                     processedCtx.arc(center.x, center.y, 5, 0, 2 * Math.PI);
                     processedCtx.fill();
                     
-                    // Check finger positions
-                    const index_up = fore_finger.y < landmarks[6].y - 0.02;
-                    const middle_up = middle_finger.y < landmarks[10].y - 0.02;
-                    const ring_up = ring_finger.y < landmarks[14].y - 0.02;
-                    const pinky_up = pinky.y < landmarks[18].y - 0.02;
+                    // Check finger positions with stricter thresholds
+                    const index_up = fore_finger.y < landmarks[6].y - 0.04;
+                    const middle_up = middle_finger.y < landmarks[10].y - 0.04;
+                    const ring_up = ring_finger.y < landmarks[14].y - 0.04;
+                    const pinky_up = pinky.y < landmarks[18].y - 0.04;
                     const thumb_up = thumb.x > landmarks[3].x + 0.05;
                     
-                    // Check gestures
-                    const is_fist = (!index_up && !middle_up && !ring_up && !pinky_up);
+                    // More strict fist detection - all fingertips must be well below their knuckles
+                    const index_really_down = fore_finger.y > landmarks[5].y + 0.02;
+                    const middle_really_down = middle_finger.y > landmarks[9].y + 0.02;
+                    const ring_really_down = ring_finger.y > landmarks[13].y + 0.02;
+                    const pinky_really_down = pinky.y > landmarks[17].y + 0.02;
+                    
+                    const is_fist = (!index_up && !middle_up && !ring_up && !pinky_up) && 
+                                   (index_really_down && middle_really_down && ring_really_down && pinky_really_down);
                     const pointer_middle_distance = Math.sqrt(
                         Math.pow((fore_finger.x - middle_finger.x) * width, 2) + 
                         Math.pow((fore_finger.y - middle_finger.y) * height, 2)
