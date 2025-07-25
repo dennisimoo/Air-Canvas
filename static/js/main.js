@@ -56,7 +56,11 @@ function checkForAnalysis() {
         analysis_confidence = 0;
         
         setTimeout(() => {
-            analysisDiv.style.display = 'none';
+            analysisDiv.classList.add('fade-out');
+            setTimeout(() => {
+                analysisDiv.style.display = 'none';
+                analysisDiv.classList.remove('fade-out');
+            }, 500);
         }, 3000);
     }
 }

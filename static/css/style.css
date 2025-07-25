@@ -100,6 +100,12 @@ body.dark-mode .status-overlay {
     gap: 8px;
 }
 
+.credit svg {
+    vertical-align: baseline;
+    display: inline-block;
+    margin-bottom: -2px;
+}
+
 body.dark-mode .credit {
     color: #94a3b8;
 }
@@ -294,6 +300,9 @@ body.dark-mode .heart-note {
     border: 1px solid #e2e8f0;
     backdrop-filter: blur(10px);
     min-width: 320px;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 body.dark-mode .analysis-result {
@@ -326,6 +335,11 @@ body.dark-mode .confidence-display {
         opacity: 1; 
         transform: translateX(0);
     }
+}
+
+.analysis-result.fade-out {
+    opacity: 0;
+    transform: translateX(100%);
 }
 
 .tutorial-overlay {
