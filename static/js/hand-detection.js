@@ -11,6 +11,9 @@ let analysis_result = "";
 let analysis_confidence = 0;
 let last_analysis_time = 0;
 
+// Gesture highlighting
+let currentGesture = 'none'; // 'draw', 'clear', 'analyze', 'none'
+
 // MediaPipe Hands
 const hands = new Hands({
     locateFile: (file) => {
@@ -35,7 +38,8 @@ function onResults(results) {
     processedCtx.drawImage(video, -processedCanvas.width, 0, processedCanvas.width, processedCanvas.height);
     processedCtx.restore();
     
-    if (results.multiHandLandmarks) {
+    // Check if hand is in frame
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         for (const landmarks of results.multiHandLandmarks) {
             // Mirror landmarks for display
             const mirroredLandmarks = landmarks.map(landmark => ({
@@ -92,6 +96,9 @@ function onResults(results) {
             const fingers_together = pointer_middle_distance < 30;
             const all_fingers_up = [index_up, middle_up, ring_up, pinky_up, thumb_up].filter(Boolean).length >= 4;
             
+            // Update gesture highlighting
+            let newGesture = 'none';
+            
             if (is_fist) {
                 // Clear canvas
                 bpoints = [[]];
@@ -99,6 +106,7 @@ function onResults(results) {
                 analysis_result = "";
                 analysis_confidence = 0;
                 last_analysis_time = Date.now() - 6000;
+                newGesture = 'clear';
             } else if (fingers_together) {
                 // Pen up
                 bpoints.push([]);
@@ -115,19 +123,30 @@ function onResults(results) {
                 }
                 bpoints.push([]);
                 blue_index++;
+                newGesture = 'analyze';
             } else if (index_up && !middle_up && !ring_up && !pinky_up) {
                 // Draw (use mirrored coordinates)
                 if (!bpoints[blue_index]) bpoints[blue_index] = [];
                 bpoints[blue_index].unshift(center);
+                newGesture = 'draw';
             } else {
                 // Other gestures
                 bpoints.push([]);
                 blue_index++;
             }
+            
+            // Update gesture highlighting if changed
+            if (newGesture !== currentGesture) {
+                updateGestureHighlight(newGesture);
+                currentGesture = newGesture;
+            }
         }
     } else {
+        // No hand in frame - remove all highlights
         bpoints.push([]);
         blue_index++;
+        updateGestureHighlight('none');
+        currentGesture = 'none';
     }
     
     // Draw pink lines - same as training data
@@ -218,7 +237,7 @@ async function setupCamera() {
             processedCanvas.height = height;
             
             console.log('Video dimensions:', width, 'x', height);
-            document.querySelector('.status-overlay span').textContent = 'Camera ready - start drawing!';
+            document.querySelector('.status-overlay span').textContent = 'Ready to draw';
         });
         
         // Setup MediaPipe camera
@@ -234,6 +253,27 @@ async function setupCamera() {
     } catch (err) {
         console.error('Camera access denied:', err);
         document.querySelector('.status-overlay span').textContent = 'Camera access denied';
+    }
+}
+
+// Gesture highlighting function
+function updateGestureHighlight(gesture) {
+    // Remove all highlight classes
+    const gestureIcons = document.querySelectorAll('.gesture-icon');
+    gestureIcons.forEach(icon => {
+        icon.classList.remove('gesture-active');
+    });
+    
+    // Add highlight class based on current gesture
+    if (gesture === 'draw') {
+        const drawIcon = document.querySelector('.gesture-icon[data-gesture="draw"]');
+        if (drawIcon) drawIcon.classList.add('gesture-active');
+    } else if (gesture === 'clear') {
+        const clearIcon = document.querySelector('.gesture-icon[data-gesture="clear"]');
+        if (clearIcon) clearIcon.classList.add('gesture-active');
+    } else if (gesture === 'analyze') {
+        const analyzeIcon = document.querySelector('.gesture-icon[data-gesture="analyze"]');
+        if (analyzeIcon) analyzeIcon.classList.add('gesture-active');
     }
 }
 
