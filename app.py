@@ -12,6 +12,10 @@ import os
 
 app = Flask(__name__)
 
+# Disable template caching for development
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
+
 # Giving different arrays to handle colour points of different colour
 bpoints = [deque(maxlen=1024)]
 
@@ -224,7 +228,12 @@ def process_frame():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Add cache busting headers
+    response = app.make_response(render_template('index.html'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 
 @app.route('/analyze_drawing', methods=['POST'])

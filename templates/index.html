@@ -399,7 +399,7 @@
     </button>
     
     <div class="header">
-        <h1 class="title">Air Canvas</h1>
+        <h1 class="title">Air Canvas1245</h1>
     </div>
     
     <div class="main-container">
@@ -782,20 +782,26 @@
         setInterval(checkDebugMessages, 500);
         
         // Auto-refresh for development - checks if HTML file changed
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Setting up auto-reload for hostname:', window.location.hostname);
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '0.0.0.0') {
             let lastModified = null;
             setInterval(async () => {
                 try {
-                    const response = await fetch('/check_template_modified');
+                    const response = await fetch('/check_template_modified?t=' + Date.now()); // Cache bust
                     const data = await response.json();
+                    console.log('Template modified check:', data.modified, 'vs', lastModified);
                     if (lastModified && data.modified !== lastModified) {
-                        window.location.reload();
+                        console.log('Template changed, reloading...');
+                        // Force hard reload to bypass all caches
+                        window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
                     }
                     lastModified = data.modified;
                 } catch (e) {
-                    // Silently fail - endpoint might not exist yet
+                    console.log('Auto-reload check failed:', e);
                 }
-            }, 1000);
+            }, 500); // Check more frequently
+        } else {
+            console.log('Auto-reload disabled for hostname:', window.location.hostname);
         }
     </script>
 </body>
