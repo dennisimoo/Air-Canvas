@@ -8,6 +8,7 @@ import torch
 from ultralytics import YOLO
 import io
 from PIL import Image
+import os
 
 app = Flask(__name__)
 
@@ -265,6 +266,19 @@ def get_debug():
     messages = debug_messages.copy()
     debug_messages = []  # Clear after sending
     return {'messages': messages}
+
+@app.route('/check_template_modified')
+def check_template_modified():
+    """Check if the HTML template has been modified for live reload"""
+    try:
+        template_path = os.path.join(app.template_folder, 'index.html')
+        if os.path.exists(template_path):
+            modified_time = os.path.getmtime(template_path)
+            return jsonify({'modified': modified_time})
+        else:
+            return jsonify({'modified': 0})
+    except Exception as e:
+        return jsonify({'modified': 0})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001, threaded=True)

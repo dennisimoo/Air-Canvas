@@ -72,10 +72,24 @@
             color: #94a3b8;
         }
         
+        .gesture-item {
+            font-size: 0.8rem;
+            color: #374151;
+            font-weight: 500;
+            text-align: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
         body.dark-mode .gesture-item {
             color: #94a3b8;
             background: rgba(30, 41, 59, 0.6);
             border-color: rgba(71, 85, 105, 0.5);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         
         body.dark-mode .status-overlay {
@@ -87,7 +101,7 @@
             position: absolute;
             bottom: 16px;
             right: 16px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #64748b;
             font-weight: 400;
         }
@@ -98,26 +112,26 @@
         
         .header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 20px;
         }
         
         .title {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 600;
             color: #1e293b;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .subtitle {
             color: #64748b;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         
         .main-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 12px;
             width: 100%;
             max-width: 900px;
             flex: 1;
@@ -139,7 +153,7 @@
         .gesture-list {
             display: flex;
             justify-content: center;
-            gap: 32px;
+            gap: 16px;
             flex-wrap: wrap;
         }
         
@@ -157,7 +171,7 @@
         
         .video-container {
             position: relative;
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             background: #000;
@@ -183,6 +197,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
         }
         
         .analysis-result {
@@ -235,6 +251,112 @@
             100% { 
                 opacity: 1; 
                 transform: translateX(0);
+            }
+        }
+        
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .tutorial-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: tutorialSlideIn 0.4s ease-out;
+        }
+        
+        body.dark-mode .tutorial-content {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        .tutorial-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1e293b;
+        }
+        
+        body.dark-mode .tutorial-title {
+            color: #f1f5f9;
+        }
+        
+        .tutorial-steps {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        
+        .tutorial-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        body.dark-mode .tutorial-step {
+            background: #334155;
+            border-left-color: #60a5fa;
+        }
+        
+        .tutorial-step-icon {
+            margin-right: 12px;
+            color: #3b82f6;
+        }
+        
+        body.dark-mode .tutorial-step-icon {
+            color: #60a5fa;
+        }
+        
+        .tutorial-step-text {
+            font-size: 0.9rem;
+            color: #374151;
+        }
+        
+        body.dark-mode .tutorial-step-text {
+            color: #e2e8f0;
+        }
+        
+        .tutorial-button {
+            background: #475569 !important;
+            color: white !important;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tutorial-button:hover {
+            background: #64748b !important;
+            transform: translateY(-1px);
+        }
+        
+        @keyframes tutorialSlideIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
             }
         }
         
@@ -292,6 +414,10 @@
                 <div class="gesture-item">Two fingers: Pen up</div>
                 <div class="gesture-item">High five: Analyze</div>
             </div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #64748b; margin-top: 8px; gap: 4px;">
+                <i data-lucide="info" size="12"></i>
+                Currently only recognizes heart drawings
+            </div>
         </div>
         
         <div class="video-container">
@@ -307,7 +433,7 @@
         <div class="credit">
             Made by Dennis Khylkouski
             <a href="https://github.com/dennisimoo/Air-Canvas" target="_blank" rel="noopener noreferrer" style="margin-left: 8px; color: inherit; text-decoration: none;" title="GitHub Repository">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="height: 16px; width: 16px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="height: 12px; width: 12px;">
                     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
                 </svg>
             </a>
@@ -322,8 +448,53 @@
         </div>
     </div>
     
+    <div id="tutorialOverlay" class="tutorial-overlay">
+        <div class="tutorial-content">
+            <h2 class="tutorial-title">Welcome to Air Canvas!</h2>
+            <div class="tutorial-steps">
+                <div class="tutorial-step">
+                    <i data-lucide="pointer" class="tutorial-step-icon" size="20"></i>
+                    <div class="tutorial-step-text">Point with your index finger to draw</div>
+                </div>
+                <div class="tutorial-step">
+                    <i data-lucide="hand" class="tutorial-step-icon" size="20"></i>
+                    <div class="tutorial-step-text">Make a fist to clear the canvas</div>
+                </div>
+                <div class="tutorial-step">
+                    <i data-lucide="fingerprint" class="tutorial-step-icon" size="20"></i>
+                    <div class="tutorial-step-text">Show two fingers to lift the pen</div>
+                </div>
+                <div class="tutorial-step">
+                    <i data-lucide="heart" class="tutorial-step-icon" size="20"></i>
+                    <div class="tutorial-step-text">Show all five fingers to analyze your drawing</div>
+                </div>
+            </div>
+            <button class="tutorial-button" onclick="closeTutorial()">Get Started!</button>
+        </div>
+    </div>
+    
     <script>
         lucide.createIcons();
+        
+        // Tutorial functionality
+        function closeTutorial() {
+            document.getElementById('tutorialOverlay').style.display = 'none';
+            localStorage.setItem('tutorialShown', 'true');
+        }
+        
+        // Close tutorial when clicking outside
+        document.getElementById('tutorialOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTutorial();
+            }
+        });
+        
+        // Check if tutorial has been shown before
+        if (!localStorage.getItem('tutorialShown')) {
+            document.getElementById('tutorialOverlay').style.display = 'flex';
+        } else {
+            document.getElementById('tutorialOverlay').style.display = 'none';
+        }
         
         // Dark mode toggle
         const themeToggle = document.getElementById('themeToggle');
@@ -609,6 +780,23 @@
         setupCamera();
         setInterval(checkForAnalysis, 1000);
         setInterval(checkDebugMessages, 500);
+        
+        // Auto-refresh for development - checks if HTML file changed
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            let lastModified = null;
+            setInterval(async () => {
+                try {
+                    const response = await fetch('/check_template_modified');
+                    const data = await response.json();
+                    if (lastModified && data.modified !== lastModified) {
+                        window.location.reload();
+                    }
+                    lastModified = data.modified;
+                } catch (e) {
+                    // Silently fail - endpoint might not exist yet
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>
